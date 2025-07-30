@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Antrian ICU RSUD RA Kartini</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: url('https://assets.promediateknologi.id/crop/0x0:0x0/0x0/webp/photo/p3/212/2025/03/15/IMG-20250315-WA0052-1997510221.jpg') no-repeat center center fixed;
+      background-size: cover;
+      color: #fff;
+      padding: 20px;
+      backdrop-filter: blur(4px);
+    }
+    h2, h3 {
+      text-align: center;
+      color: #ffffff;
+      text-shadow: 1px 1px 4px #000;
+    }
+    form {
+      background: rgba(0, 0, 0, 0.6);
+      padding: 15px;
+      border-radius: 10px;
+      max-width: 500px;
+      margin: auto;
+    }
+    label {
+      display: block;
+      margin-top: 10px;
+    }
+    input, select, textarea, button {
+      width: 100%;
+      padding: 8px;
+      margin-top: 5px;
+      border-radius: 5px;
+      border: none;
+    }
+    button {
+      background-color: #28a745;
+      color: white;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+    button:hover {
+      background-color: #218838;
+    }
+    .admin-btn {
+      background-color: #007bff;
+      margin-top: 20px;
+    }
+    .admin-btn:hover {
+      background-color: #dd0e22;
+    }
+    ul {
+      list-style: none;
+      padding: 0;
+      max-width: 800px;
+      margin: 30px auto;
+      background: rgba(0, 0, 0, 0.6);
+      border-radius: 10px;
+    }
+    li {
+      border-bottom: 1px solid #ddd;
+      padding: 10px;
+    }
+    li:last-child {
+      border-bottom: none;
+    }
+    .hapus-btn {
+      background: #dc3545;
+      color: white;
+      border: none;
+      padding: 5px 10px;
+      border-radius: 5px;
+      float: right;
+      cursor: pointer;
+    }
+    .hapus-btn:hover {
+      background: #c82333;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>Pendaftaran Antrean Masuk ICU</h2>
+  <h2>RSUD RA Kartini Jepara</h2>
+  <form id="formPasien">
+    <label>Nama Pasien:</label>
+    <input type="text" id="nama" required>
+
+    <label>Diagnosa:</label>
+    <input type="text" id="diagnosa" required>
+
+    <label>Prioritas Masuk ICU:</label>
+    <select id="kegawatan" required>
+      <option value="">--Pilih Prioritas--</option>
+      <option value="1">Prioritas 1: Kritis, butuh terapi intensif segera</option>
+      <option value="2">Prioritas 2: Risiko tinggi, butuh pemantauan intensif</option>
+      <option value="3">Prioritas 3: Prognosis buruk, hanya butuh perawatan suportif</option>
+      <option value="4">Prioritas 4: Tidak memenuhi kriteria ICU, kecuali pertimbangan khusus</option>
+    </select>
+
+    <label>Asal Ruangan:</label>
+    <input type="text" id="asal" required>
+
+    <label>Keterangan Lain:</label>
+    <textarea id="keterangan"></textarea>
+
+    <button type="submit">Daftarkan Pasien</button>
+	<div style="text-align: center;">
+    <button class="admin-btn" onclick="masukAdmin()">🔐 Masuk Admin</button>
+    <button class="admin-btn" onclick="logoutAdmin()">🚪 Keluar Admin</button>
+    </div>
+  </form>
+
+
+
+  <h3>Daftar Antrian ICU</h3>
+  <ul id="daftarAntrian"></ul>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
+    import { getDatabase, ref, push, onValue, remove } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDxIcm7Z5UmgDdMiBloVAWuVBnxz5FWVak",
+      authDomain: "antrian-icu.firebaseapp.com",
+      databaseURL: "https://antrian-icu-default-rtdb.firebaseio.com",
+      projectId: "antrian-icu",
+      storageBucket: "antrian-icu.firebasestorage.app",
+      messagingSenderId: "819362863303",
+      appId: "1:819362863303:web:21f44fe2652d61784ac6e2",
+      measurementId: "G-2239LCJT3C"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    let isAdmin = localStorage.getItem("isAdmin") === "true";
+
+    const form = document.getElementById('formPasien');
+    const daftarList = document.getElementById('daftarAntrian');
+    const daftarRef = ref(db, 'antrian');
+
+    form.addEventListener('submit', function(e) {
+      e.preventDefault();
+      const data = {
+        nama: document.getElementById('nama').value,
+        diagnosa: document.getElementById('diagnosa').value,
+        kegawatan: document.getElementById('kegawatan').value,
+        asal: document.getElementById('asal').value,
+        keterangan: document.getElementById('keterangan').value,
+        waktu: new Date().toISOString()
+      };
+      push(daftarRef, data).then(() => {
+        alert("✅ Pasien berhasil didaftarkan.");
+        form.reset();
+      }).catch((error) => {
+        alert("❌ Gagal mengirim data: " + error.message);
+      });
+    });
+
+    onValue(daftarRef, (snapshot) => {
+      daftarList.innerHTML = "";
+      const data = snapshot.val();
+      if (data) {
+        const entries = Object.entries(data).sort((a, b) => new Date(a[1].waktu) - new Date(b[1].waktu));
+        entries.forEach(([key, pasien]) => {
+          const item = document.createElement('li');
+          item.innerHTML = `
+            <strong>${pasien.nama}</strong><br>
+            Diagnosa: ${pasien.diagnosa}<br>
+            Prioritas: ${pasien.kegawatan}<br>
+            Dari: ${pasien.asal}<br>
+            <em>${pasien.keterangan}</em>
+            ${isAdmin ? `<button class="hapus-btn" onclick="hapusPasien('${key}')">❌ Hapus</button>` : ""}
+          `;
+          daftarList.appendChild(item);
+        });
+      }
+    });
+
+    window.hapusPasien = function(id) {
+      if (confirm("Yakin ingin menghapus pasien ini?")) {
+        remove(ref(db, `antrian/${id}`));
+      }
+    };
+
+    window.masukAdmin = function() {
+      const kode = prompt("Masukkan kode admin:");
+      if (kode === "icuadmin2025") {
+        isAdmin = true;
+        localStorage.setItem("isAdmin", "true");
+        alert("✅ Anda masuk sebagai admin.");
+        location.reload();
+      } else {
+        alert("❌ Kode salah.");
+      }
+    };
+
+    window.logoutAdmin = function() {
+      isAdmin = false;
+      localStorage.removeItem("isAdmin");
+      alert("🚪 Anda keluar dari mode admin.");
+      location.reload();
+    };
+  </script>
+</body>
+</html>

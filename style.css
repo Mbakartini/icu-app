@@ -1,0 +1,66 @@
+body {
+  margin: 0;
+  font-family: 'Segoe UI', sans-serif;
+  background: url('https://assets.promediateknologi.id/crop/0x0:0x0/0x0/webp/photo/p3/212/2025/03/15/IMG-20250315-WA0052-1997510221.jpg') no-repeat center center fixed;
+  background-size: cover;
+  color: #fff;
+}
+
+.container {
+  background-color: rgba(0, 0, 0, 0.7);
+  max-width: 800px;
+  margin: 50px auto;
+  padding: 30px;
+  border-radius: 16px;
+  box-shadow: 0 0 10px rgba(255,255,255,0.2);
+}
+
+h1, h2 {
+  text-align: center;
+}
+
+form input, form select, button {
+  width: 100%;
+  padding: 10px;
+  margin: 8px 0;
+  border: none;
+  border-radius: 8px;
+}
+
+button {
+  background-color: #28a745;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+#notif {
+  text-align: center;
+  margin-top: 10px;
+  font-weight: bold;
+}
+
+table {
+  width: 100%;
+  margin-top: 20px;
+  background-color: white;
+  color: black;
+  border-collapse: collapse;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+table th, table td {
+  padding: 10px;
+  text-align: left;
+  border-bottom: 1px solid #ccc;
+}
+
+table td:last-child button {
+  background-color: red;
+  color: white;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+}
